@@ -9,18 +9,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
+// Guest route
 Route::group(['middleware' => ['guest']], function () {
     Route::get('/signup', [AuthController::class, "signup_view"])->name('signup');
     Route::get('/signin', [AuthController::class, "signin_view"])->name('signin');
     Route::get('/forgot-password', [AuthController::class, "forgot_password_view"])->name('forgot-password');
 });
 
+// Authentication route
 Route::post("/signup", [AuthController::class, "signup"])->name('signup.post');
 Route::post("/signin", [AuthController::class, "signin"])->name('signin.post');
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify_email'])->name('verification.verify');
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get("/Signout", [AuthController::class, "Signout"])->name('Signout');
+    // Dashboard route
     Route::get('/dashboard', [AuthController::class, "dashboard"])->name('dashboard');
 
     // Events route
