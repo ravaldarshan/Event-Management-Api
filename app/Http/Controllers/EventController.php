@@ -4,9 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
+    /**
+     * Display a listing of the events.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $events = Event::all();
@@ -19,6 +25,12 @@ class EventController extends Controller
         );
     }
 
+    /**
+     * Store a newly created event in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store_event(Request $request)
     {
         $validatedData = $request->validate([
@@ -39,11 +51,35 @@ class EventController extends Controller
         return response()->json($event, 201);
     }
 
-    public function get_event(Event $event)
+    /**
+     * Display the specified event.
+     *
+     * @param  int  $event_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_event($event_id)
     {
-        return $event;
+        $validator = Validator::make(['event_id' => $event_id], [
+            'event_id' => 'required|exists:events,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => 'Invalid ID provided'], 422);
+        }
+
+        $event = Event::find($event_id);
+
+        // Return success response
+        return response()->json(['status' => true, 'data' => $event], 200);
     }
 
+    /**
+     * Update the specified event in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Event  $event
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update_event(Request $request, Event $event)
     {
         $validatedData = $request->validate([
@@ -55,12 +91,29 @@ class EventController extends Controller
 
         $event->update($validatedData);
 
-        return response()->json($event, 200);
+        // Return success response
+        return response()->json(['status' => true, 'message' => 'Event updated successfully', 'data' => $event], 200);
     }
 
-    public function delete(Event $event)
+    /**
+     * Remove the specified event from storage.
+     *
+     * @param  int  $event_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($event_id)
     {
+        $validator = Validator::make(['event_id' => $event_id], [
+            'event_id' => 'required|exists:events,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => 'Invalid ID provided'], 422);
+        }
+        $event = Event::find($event_id);
         $event->delete();
-        return response()->noContent();
+
+        // Return success response
+        return response()->json(['status' => true, 'message' => 'Event deleted successfully'], 200);
     }
 }
