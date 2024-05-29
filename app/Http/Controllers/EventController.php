@@ -9,7 +9,14 @@ class EventController extends Controller
 {
     public function index()
     {
-        return Event::all();
+        $events = Event::all();
+        return response(
+            [
+                'data' => $events,
+                'status' => true,
+            ],
+            200,
+        );
     }
 
     public function store_event(Request $request)
